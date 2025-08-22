@@ -9,10 +9,7 @@ import (
 	redis1 "gin-redis-shell/redis"
 
 	"github.com/gorilla/mux"
-	"github.com/redis/go-redis/v9"
 )
-
-var rdb *redis.Client
 
 func main() {
 	//初始化Redis客户端
@@ -22,6 +19,7 @@ func main() {
 	redisPassword := ""
 	redisDB := 0
 	redis1.InitRedis(redisAddr, redisPassword, redisDB)
+	rdb := redis1.GetRedisClient()
 	fmt.Println(rdb)
 	//获取每日一言
 	quote, err := handlers.GetDailyQuoteFromApi()
@@ -30,7 +28,7 @@ func main() {
 	}
 	fmt.Println(err)
 	//打印获取的每日一言 。。。
-	fmt.Printf("Got:%q", quote)
+	fmt.Printf("Got:%+v", quote)
 	fmt.Println("---------------------------------------")
 	//保存到redis，设置24小时过期
 
@@ -43,7 +41,7 @@ func main() {
 	}
 	r := mux.NewRouter()
 	r.HandleFunc("/quote", handlers.GetDailyQuote).Methods("GET")
-	err = http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", r)
 	if err != nil {
 		fmt.Printf("HTTP server start failed,err :%v", err)
 		return

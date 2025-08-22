@@ -58,6 +58,7 @@ func GetDailyQuoteFromApi() (*models.QuoteResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("解析json失败,%v", err)
 	}
+	fmt.Println("获取每日一言成功", quote.Data)
 	return &quote, nil
 }
 

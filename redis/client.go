@@ -30,7 +30,10 @@ func InitRedis(addr string, password string, db int) {
 	} else {
 		fmt.Println("Connected to Redis successfully")
 	}
+}
 
+func GetRedisClient() *redis.Client {
+	return rdb
 }
 
 // GetQuote 从Redis获取每日一言
