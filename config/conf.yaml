@@ -1,0 +1,21 @@
+server:
+  {
+  ip:0.0.0.0
+  port:8080
+  }
+
+redis:
+  url: 
+  port:6379
+
+# spider:
+#   [{
+#     address:
+#     api_format:{}
+#     mapper:[
+#       {f1:s1,f2:tag,}
+#     ]
+#     fix:{
+#       {"tag":故事}
+#     }
+#   }]
