@@ -25,6 +25,7 @@ func GetDailyQuote(w http.ResponseWriter, r *http.Request) {
 	//从redis获取数据
 	quote, err := redis1.GetQuote(tag, name)
 	if err != nil {
+		fmt.Println("----------", err)
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Quote not found"})
 		return

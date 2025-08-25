@@ -37,8 +37,8 @@ func GetRedisClient() *redis.Client {
 }
 
 // GetQuote 从Redis获取每日一言
-func GetQuote(tag, name string) (*models.Quote, error) {
-	var quote models.Quote
+func GetQuote(tag, name string) (*models.QuoteResponse, error) {
+	var quote models.QuoteResponse
 	var key string
 	//根据查询条件构建Redis key
 	if name != "" && tag != "" {
@@ -64,7 +64,7 @@ func GetQuote(tag, name string) (*models.Quote, error) {
 }
 
 // CacheQuote缓存每日一言到redis
-func CacheQuote(quote *models.Quote, expiration time.Duration) error {
+func CacheQuote(quote *models.QuoteResponse, expiration time.Duration) error {
 	//序列化为Json
 	data, err := json.Marshal(quote)
 	if err != nil {
@@ -76,16 +76,16 @@ func CacheQuote(quote *models.Quote, expiration time.Duration) error {
 		return err
 	}
 	//缓存按tag索引
-	for _, tag := range quote.Tag {
-		key := fmt.Sprintf("quote:tag:%s", tag)
+	for _, tag := range quote.Data.Tag {
+		key := fmt.Sprintf("quote:tag:%v", tag)
 		err = rdb.Set(ctx, key, data, expiration).Err()
 		if err != nil {
 			return err
 		}
 	}
 	//缓存按作者名索引
-	if quote.Name != "" {
-		key := fmt.Sprintf("quote:name:%s", quote.Name)
+	if quote.Data.Name != "" {
+		key := fmt.Sprintf("quote:name:%s", quote.Data.Name)
 		err = rdb.Set(ctx, key, data, expiration).Err()
 		if err != nil {
 			return err

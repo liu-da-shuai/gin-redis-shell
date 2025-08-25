@@ -1,13 +1,12 @@
 package models
 
-import "encoding/json"
-
 type Quote struct {
-	ID     int      `json:"id"`
-	Text   string   `json:"text"`
-	Name   string   `json:"name"`
-	Tag    []string `json:"tag"`
-	Source string   `json:"source,omitempty"`
+	Code int    `json:"code"`
+	Message string `json:"message"`
+	Result struct {
+		Name	string   `json:"name"`
+		From   string   `json:"from"`
+	}
 }
 type QuoteRequest struct {
 	Tag  string `json:"tag,omitempty"`
@@ -23,9 +22,7 @@ type QuoteResponse struct {
 		Content    string `json:"content"`
 		Created_at string `json:"created_at"`
 		Updated_at string `json:"updated_at"`
-		Error      string `json:"error"`
-		UpdateTime string `json:"updatetime"`
 	} `json:"data"`
-	Error      json.RawMessage `json:"error"`
-	UpdateTime json.RawMessage `json:"updateTime"`
+	Error      string `json:"error"`
+	UpdateTime int64  `json:"updatetime"`
 }
