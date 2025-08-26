@@ -59,7 +59,6 @@ func GetDailyQuoteFromApi() (*models.QuoteResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("解析json失败,%v", err)
 	}
-	fmt.Println("获取每日一言成功", quote.Data)
 	return &quote, nil
 }
 
@@ -102,4 +101,48 @@ func SaveToRedis(rdb *redis.Client, key string, data interface{}, expiration tim
 	fmt.Println(err)
 	log.Printf("数据已存入Redis,键名:%s", key)
 	return nil
+}
+func SaveAndGetQuote(rdb *redis.Client) {
+	//获取每日一言
+	//创建一个每5秒触发一次的定时器
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	//用于退出的通道
+	quit := make(chan struct{})
+	//启动一个goroutine来处理定时任务
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				//每5秒执行一次的任务
+				quote, err := GetDailyQuoteFromApi()
+				if err != nil {
+					fmt.Println("获取每日一言失败:", err)
+					continue
+				}
+				//打印获取的每日一言 。。。
+				fmt.Printf("成功获取数据:%+v\n", quote)
+				fmt.Println("---------------------------------------")
+				//保存到redis，设置24小时过期
+				var key string
+				err = SaveToRedis(rdb, key, quote, 24*time.Hour)
+				if err != nil {
+					fmt.Printf("保存到Redis失败:%v", err)
+				} else {
+					fmt.Println("每日一言已成功获取并储存到Redis")
+				}
+			case <-quit:
+				//退出goroutine
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+	//等待用户输入以退出程序
+	fmt.Println("Press Enter to stop...")
+	var input string
+	fmt.Scanln(&input)
+	close(quit)
+	fmt.Println("程序已退出")
+
 }
