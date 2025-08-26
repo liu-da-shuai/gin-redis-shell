@@ -1,18 +1,46 @@
 server:
-  {
   ip:127.0.0.1
   port:8080
-  }
+
 
 redis:
   addr: "localhost:6379"
   password: ""
   db: 0
-  
+
+spider:
+  site:
+    - url: http://www.baidu.com
+      format: '{"code":200,"data":{"id":603,"tag":"小说","name":"佚名","origin":"《阿亚罗克年代记》","content":"正义不会因为无人歌颂而变成非议。","created_at":"2019-01-23T07:31:01.000Z","updated_at":"2022-03-09T08:42:10.000Z"},"error":null,"updateTime":1756203717214}'
+      mapper:
+        - data:data
+        - content:content
+        - tag:tag
+    - url: https://api.apiopen.top/api/sentences
+      format: '{"code":200,"message":"成功!","result":{"name":"水急客舟疾，山花拂面香。","from":"李白《秋浦歌十七首》"}}'
+      dataKey: result
+      mapper:
+        - field:
+            name: name
+            key: content
+            default:
+        - field:
+            name: tag
+            key: form
+            default: '故事'
 quote_key: "quote:daily"
 
-      
-   
+
+map[string]interface // 一开始接受的 
+type Resp struct {
+
+}
+
+
+type Content struct {
+
+}
+
 # spider:
 #   [{
 #     address:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gin-redis-shell/config"
 	"gin-redis-shell/models"
 	"sync"
 	"time"
@@ -19,10 +20,11 @@ var (
 
 // 初始化redis连接
 func InitRedis(addr string, password string, db int) {
+
 	once.Do(func() {
 		rdb = redis.NewClient(&redis.Options{
-			Addr:     addr,
-			Password: password,
+			Addr:     config.Conf.Redis.Host + ":" + config.Conf.Redis.Port,
+			Password: config.Conf.Redis.Password,
 			DB:       db,
 		})
 

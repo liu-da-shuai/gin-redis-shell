@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin-redis-shell/config"
 	"gin-redis-shell/router"
+	"gin-redis-shell/spider"
 )
 
 //func main() {
@@ -46,6 +47,7 @@ import (
 
 func main() {
 	config.MockConfig() // to 后续用你yaml的来
+	spider.NewSpider()
 	if err := router.Start(); err != nil {
 		fmt.Printf("HTTP server start failed,err :%v", err)
 	}

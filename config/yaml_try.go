@@ -10,6 +10,7 @@ type Config struct {
 	Server   ConfigServer   `yaml:"server"`
 	Database ConfigDatabase `yaml:"database"`
 	Redis    Redis          `yaml:"redis"`
+	Spider   Spider         `yaml:"spider"`
 }
 
 type Redis struct {
@@ -79,6 +80,38 @@ func yaml_try() {
 var Conf *Config
 
 func MockConfig() {
+	yamlData, err := os.ReadFile("config/conf.yaml")
+	if err != nil {
+		fmt.Println("读取yaml文件失败:", err)
+		return
+	}
+	//创建结构体实例用于接收解析后的数据
+	//解析yaml
+	err = yaml.Unmarshal(yamlData, &Conf)
+	if err != nil {
+		panic(err)
+		return
+	}
+	Conf.SetDefault()
 	//	 todo 假的后续 用你yaml解析的来 port 用string
-	Conf = &Config{Server: ConfigServer{Port: 8888}, Redis: Redis{Host: "127.0.0.1", Port: "6379"}}
+	//Conf = &Config{Server: ConfigServer{Port: 8888}, Redis: Redis{Host: "127.0.0.1", Port: "6379"}}
+}
+
+func (config *Config) SetDefault() {
+	if config.Server.Ip == "" {
+		config.Server.Ip = "127.0.0.1"
+	}
+	if config.Server.Port == 0 {
+		config.Server.Port = 6379
+	}
+}
+
+type Spider struct {
+	SiteList []Site `yaml:"site_list"`
+}
+
+type Site struct {
+	Url    string            `yaml:"url"`
+	Format string            `yaml:"format"`
+	Mapper map[string]string `yaml:"mapper"`
 }
