@@ -5,31 +5,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"gin-redis-shell/models"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
 var (
-	rdb *redis.Client
-	ctx = context.Background()
+	rdb  *redis.Client
+	ctx  = context.Background()
+	once sync.Once
 )
 
 // 初始化redis连接
 func InitRedis(addr string, password string, db int) {
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       db,
+	once.Do(func() {
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: password,
+			DB:       db,
+		})
+
+		//测试连接
+		_, err := rdb.Ping(ctx).Result()
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Println("Connected to Redis successfully")
+		}
 	})
 
-	//测试连接
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("Connected to Redis successfully")
-	}
 }
 
 func GetRedisClient() *redis.Client {

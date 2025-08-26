@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gin-redis-shell/dto"
 	"gin-redis-shell/models"
+	"gin-redis-shell/service"
+	"github.com/gin-gonic/gin"
 	"log"
 
 	redis1 "gin-redis-shell/redis"
@@ -15,6 +18,31 @@ import (
 
 	"github.com/redis/go-redis/v9"
 )
+
+type QuoteHandlers struct {
+	BaseHandler
+	srv *service.QuoteService
+}
+
+func NewQuoteHandlers() *QuoteHandlers {
+	return &QuoteHandlers{
+		srv: service.NewQuoteService(),
+	}
+}
+
+func (h *QuoteHandlers) GetDailyQuote(c *gin.Context) {
+	var req dto.QuoteReq
+	if err := c.ShouldBind(&req); err != nil {
+		h.Response(c, nil, err)
+		return
+	}
+	data, err := h.srv.GetQuote(c, &req)
+	if err != nil {
+		h.Response(c, nil, err)
+		return
+	}
+	h.Response(c, data, nil)
+}
 
 // GetDailyQuote 获取每日一言的Http处理函数
 func GetDailyQuote(w http.ResponseWriter, r *http.Request) {
