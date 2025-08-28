@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"gin-redis-shell/models"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -63,34 +62,34 @@ func GetQuote(tag, name string) (*models.QuoteResponse, error) {
 	return &quote, nil
 }
 
-// CacheQuote缓存每日一言到redis
-func CacheQuote(quote *models.QuoteResponse, expiration time.Duration) error {
-	//序列化为Json
-	data, err := json.Marshal(quote)
-	if err != nil {
-		return err
-	}
-	//缓存主要key
-	err = rdb.Set(ctx, "quote:daily", data, expiration).Err()
-	if err != nil {
-		return err
-	}
-	//缓存按tag索引
-	for _, tag := range quote.Data.Tag {
-		key := fmt.Sprintf("quote:tag:%v", tag)
-		err = rdb.Set(ctx, key, data, expiration).Err()
-		if err != nil {
-			return err
-		}
-	}
-	//缓存按作者名索引
-	if quote.Data.Name != "" {
-		key := fmt.Sprintf("quote:name:%s", quote.Data.Name)
-		err = rdb.Set(ctx, key, data, expiration).Err()
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+// // CacheQuote缓存每日一言到redis
+// func CacheQuote(quote *models.QuoteResponse, expiration time.Duration) error {
+// 	//序列化为Json
+// 	data, err := json.Marshal(quote)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	//缓存主要key
+// 	err = rdb.Set(ctx, "quote:daily", data, expiration).Err()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	//缓存按tag索引
+// 	for _, tag := range quote.Data.Tag {
+// 		key := fmt.Sprintf("quote:tag:%v", tag)
+// 		err = rdb.Set(ctx, key, data, expiration).Err()
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+// 	//缓存按作者名索引
+// 	if quote.Data.Name != "" {
+// 		key := fmt.Sprintf("quote:name:%s", quote.Data.Name)
+// 		err = rdb.Set(ctx, key, data, expiration).Err()
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+// 	return nil
 
-}
+// }

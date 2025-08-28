@@ -1,16 +1,21 @@
-package main
+package config
+
 import (
-	"os"
 	"fmt"
+	redis1 "gin-redis-shell/redis"
+	"os"
+
 	yaml "gopkg.in/yaml.v3"
 )
+var Conf *Config
 type Config struct{
 	Server ConfigServer `yaml:"server"`
+	Redis ConfigRedis `yaml:"redis"`
 	Database ConfigDatabase `yaml:"database"`
 }
 type ConfigServer struct{
 	Ip string `yaml:"ip"`
-	Port int `yaml:"port"`
+	Port string `yaml:"port"`
 }
 type ConfigDatabase struct{
 	Url string `yaml:"url"`
@@ -22,6 +27,11 @@ type ConfigDataBase struct{
 	Error string `yaml:"error"`
 	UpdateTime int64 `yaml:"updatetime"`
 }
+type ConfigRedis struct{
+	Addr string `yaml:"addr"`
+	Password string `yaml:"password"`
+	db int `yaml:"db"`
+}
 type ConfigDataBaseINfo struct{
 	Id int `yaml:"id"`
 	Tag string `yaml:"tag"`
@@ -31,37 +41,38 @@ type ConfigDataBaseINfo struct{
 	Created_at string `yaml:"created_at"`
 	Updated_at string `yaml:"updated_at"`
 }
-func yaml_try(){
+func ParseConfig() *Config {
+	Conf = &Config{Server: ConfigServer{Port: ":8080",Ip: "127.0.0.1"}, Redis: ConfigRedis{Addr: "127.0.0.1:6379",Password: "",db:0},}
+	return Conf
+}
+func MockConfig() *Config {
   //读取yaml
   yamlData,err := os.ReadFile("config/conf.yaml")
   if err != nil{
 	fmt.Println("读取yaml文件失败:",err)
-   	return  
+   	panic(err)
 }
 //创建结构体实例用于接收解析后的数据
-  var config Config
+
   //解析yaml
-  err = yaml.Unmarshal(yamlData,&config)
+  err = yaml.Unmarshal(yamlData,&Conf)
   if err != nil{
 	fmt.Println("解析yaml文件失败:",err)
-   	return
+   	panic(err)	
   }
-//修改yaml
-//把server.port改为8888
-config.Server.Port = 8888
-//把database.url改为192.168.33.33
-config.Database.Url = "192.168.33.33"
-//保存yaml
-newData,err := yaml.Marshal(&config)
-if err != nil{
-	fmt.Println("序列化yaml失败:",err)
-   	return
+  ParseConfig()
+  Conf.SetDefault()
+  redis1.InitRedis(Conf.Redis.Addr,Conf.Redis.Password,Conf.Redis.db)
+  return Conf
 }
-err = os.WriteFile("config/conf.yaml",newData,0644)
-if err != nil{
-	fmt.Println("保存yaml文件失败:",err)
-   	return
-}
-//成功
-fmt.Println("yaml文件操作成功")
+func (config *Config) SetDefault() {
+	if config.Server.Port == "" {
+		config.Server.Port = ":8080"
+	}
+	if config.Server.Ip == "" {
+		config.Server.Ip = "127.0.0.1"
+	}
+	if config.Redis.Addr == "" {
+		config.Redis.Addr = "localhost:6379"
+	}
 }
